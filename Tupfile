@@ -1,0 +1,15 @@
+.gitignore
+
+CFLAGS += -mmcu=atmega328p -DF_CPU=160000000ul -DBAUD_RATE=9600 -Wa,--fatal-warnings
+
+!as  =  |> ^ AS %o^    avr-gcc $(CFLAGS) %f -o %o                  |>
+!dis  = |> ^ DIS %o^   avr-objdump -d %f > %o                      |>
+!hex  = |> ^ HEX %o^   avr-objcopy -j .text -j .data -O ihex %f %o |>
+!size = |> ^ SIZE %o^  avr-size -C --mcu=atmega328p %f > %o        |>
+
+
+: teletext.S |> !as |> %B.elf {bins}
+
+: foreach {bins}  |> !dis  |> %B.dis
+: foreach {bins}  |> !hex  |> %B.hex
+: foreach {bins}  |> !size |> %B_size.txt
