@@ -3,35 +3,36 @@
 zero = 1
 temp = 16
 data = 17
-counter = 18
+length = 18
 
 LINE_T = 1024                   ; 64 us
 SYNC_T = 64                     ; 4 us
 
-.section .text
-.global main
+.section .data
+pattern:
+        .rept   45
+        .byte   0xFF
+        .endr
 
+.section .text
+
+pattern_rom:
+        .ascii  "hej"
+pattern_rom_end:
+        .align  2
+
+.global main
 main:
         clr     zero
         rcall   init_timer
         rcall   init_usart
+        rcall   copy_pattern
 1:
-        ldi     data, 0
-        ldi     counter, 45
-2:
-        sts     UDR0, data
-3:
-        lds     temp, UCSR0A
-        sbrs    temp, UDRE0
-        rjmp    3b
-        inc     data
-        dec     counter
-        brne    2b
-        ldi     counter, 0xFF
-2:
-        dec     counter
-        brne    2b
-        rjmp    1b
+        ldi     length, pattern_rom_end-pattern_rom
+        ldi     r27, hi8(pattern)
+        ldi     r26, lo8(pattern)
+        rcall   send_data
+        rjmp 1b
 
 init_timer:
         sbi     _SFR_IO_ADDR(DDRB), 2
@@ -59,6 +60,36 @@ init_usart:
         sts     UCSR0C, temp
         ldi     temp, (0<<RXEN0)|(1<<TXEN0)
         sts     UCSR0B, temp
+        ret
+
+copy_pattern:
+        ldi     length, pattern_rom_end-pattern_rom
+        ldi     r27, hi8(pattern)
+        ldi     r26, lo8(pattern)
+        ldi     r31, hi8(pattern_rom)
+        ldi     r30, lo8(pattern_rom)
+1:
+        lpm     data, z+
+        st      x+, data
+        dec     length
+        brne    1b
+        ret
+
+send_data:
+2:
+        ld      data, x+
+        sts     UDR0, data
+3:
+        lds     temp, UCSR0A
+        sbrs    temp, UDRE0
+        rjmp    3b
+        inc     data
+        dec     length
+        brne    2b
+        ldi     length, 0xFF
+2:
+        dec     length
+        brne    2b
         ret
 
 .end
