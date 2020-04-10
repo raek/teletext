@@ -4,6 +4,25 @@ zero = 1
 temp = 16
 data = 17
 length = 18
+delay_lo = r24
+delay_hi = r25
+
+.macro delay_cycles n:req
+.if \n <= 4
+        .rept   \n
+        sei
+        .endr
+.else
+        ldi     r24, ((\n - 1) / 4) & 0xFF
+        ldi     r25, ((\n - 1) / 4) >> 8
+999:
+        sbiw    r24, 1
+        brne    999b
+        .rept   (\n - 1) % 4
+        sei
+        .endr
+.endif
+.endm
 
 LINE_T = 1024                   ; 64 us
 SYNC_T = 75                     ; 4.7 us
