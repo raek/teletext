@@ -4,4 +4,4 @@ set -e
 set -u
 
 tup
-avrdude -p m328p -c arduino -P ${DEVICE:-/dev/ttyUSB0} -U flash:w:teletext.hex:i "$@"
+avrdude -p m328p -c usbasp -U flash:w:teletext.hex:i "$@"
