@@ -25,9 +25,9 @@ delay_hi = 25
 .else
         ldi     delay_lo, ((\n - 1) / 4) & 0xFF
         ldi     delay_hi, ((\n - 1) / 4) >> 8
-999:
+delay_c_\@:
         sbiw    delay_lo, 1
-        brne    999b
+        brne    delay_c_\@
         .rept   (\n - 1) % 4
         nop
         .endr
