@@ -20,7 +20,7 @@ delay_hi = 25
 .macro delay_c n:req
 .if \n <= 4
         .rept   \n
-        sei
+        nop
         .endr
 .else
         ldi     delay_lo, ((\n - 1) / 4) & 0xFF
@@ -29,7 +29,7 @@ delay_hi = 25
         sbiw    delay_lo, 1
         brne    999b
         .rept   (\n - 1) % 4
-        sei
+        nop
         .endr
 .endif
 .endm
